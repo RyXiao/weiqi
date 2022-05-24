@@ -1,14 +1,18 @@
+#基于Github原有的库增加了保存SGF棋谱的功能。目前版本只能保存所有棋子，但是没办法保存顺序。
+
+
 #!/usr/bin/python3
 # 使用Python内置GUI模块tkinter
 from tkinter import *
 # ttk覆盖tkinter部分对象，ttk对tkinter进行了优化
+from tkinter import filedialog
 from tkinter.ttk import *
 # 深拷贝时需要用到copy模块
 import copy
 import tkinter.messagebox
 # 围棋应用对象定义
 class Application(Tk):
-	# 初始化棋盘,默认九路棋盘
+	# 初始化棋盘,默认十九路棋盘
 	def __init__(self,my_mode_num=9):
 		Tk.__init__(self)
 		# 模式，九路棋：9，十三路棋：13，十九路棋：19
@@ -70,8 +74,11 @@ class Application(Tk):
 		self.newGameButton2.place(x=480*self.size,y=325*self.size)
 		self.quitButton=Button(self,text='退出游戏',command=self.quit)
 		self.quitButton.place(x=480*self.size,y=350*self.size)
+		self.saveButton=Button(self,text='保存游戏',command=self.save)
+		self.saveButton.place(x=480*self.size, y=350*self.size)
 		# 画棋盘，填充颜色
-		self.canvas_bottom.create_rectangle(0*self.size,0*self.size,400*self.size,400*self.size,fill='#c51')
+# 		self.canvas_bottom.create_rectangle(0*self.size,0*self.size,400*self.size,400*self.size,fill='#c51')
+		self.canvas_bottom.create_rectangle(0*self.size,0*self.size,400*self.size,400*self.size,fill='white')
 		# 刻画棋盘线及九个点
 		# 先画外框粗线
 		self.canvas_bottom.create_rectangle(20*self.size,20*self.size,380*self.size,380*self.size,width=3)
@@ -98,7 +105,27 @@ class Application(Tk):
 		self.canvas_bottom.bind('<Button-1>',self.getDown)
 		# 设置退出快捷键<Ctrl>+<D>，快速退出游戏
 		self.bind('<Control-KeyPress-d>',self.keyboardQuit)
-	# 开始游戏函数，点击“开始游戏”时调用
+	
+    
+	def save(self):
+		strB="(;CA[gb2312]AB"
+		strW="AW"
+		strDefault = "AP[MultiGo:4.4.4]SZ[19]"
+		for i in range(1,self.mode_num+1):
+		    for j in range(1, self.mode_num+1):
+		        if self.positions[i][j]==1:
+		            strB+='['+num_alpha[str(j)]+num_alpha[str(i)]+']'
+		        if self.positions[i][j]==2:
+		            strW+='['+num_alpha[str(j)]+num_alpha[str(i)]+']'
+		SGF_content = strB+strW+strDefault
+		print(SGF_content)
+		FilePath = filedialog.asksaveasfilename(title=u'保存文件')
+		if FilePath is not None:
+		    with open(file = FilePath, mode='w', encoding='utf-8') as file:
+		        file.write(SGF_content)
+    
+    
+    # 开始游戏函数，点击“开始游戏”时调用
 	def start(self):
 		# 删除右侧太极图
 		self.canvas_bottom.delete(self.pW)
@@ -113,6 +140,7 @@ class Application(Tk):
 		# 开始标志，解除stop
 		self.stop=None
 	# 放弃一手函数，跳过落子环节
+    
 	def passme(self):
 		# 悔棋恢复
 		if not self.regretchance==1:
@@ -347,10 +375,17 @@ class Application(Tk):
 		newApp=True
 		self.quit()
 
+
+
+        
+
+
 # 声明全局变量，用于新建Application对象时切换成不同模式的游戏
-global mode_num,newApp
-mode_num=9
-newApp=False	
+global mode_num,newApp, num_alpha
+mode_num=19
+newApp=False
+#通过数值转成英文作为SGF的坐标
+num_alpha = {'1':'a', '2':'b', '3':'c' , '4':'d', '5':'e', '6':'f', '7':'g', '8':'h', '9':'i', '10':'j', '11':'k', '12':'l', '13':'m', '14':'n','15':'o','16':'p','17':'q','18':'r','19':'s'}	
 if __name__=='__main__':
 	# 循环，直到不切换游戏模式
 	while True:
